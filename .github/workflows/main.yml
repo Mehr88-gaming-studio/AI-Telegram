@@ -1,27 +1,27 @@
-name Run Python Code
+name: Run Python Code
 
-on
-  push
-    branches
+on:
+  push:
+    branches:
       - main
 
-jobs
-  run_code
-    runs-on ubuntu-latest
+jobs:
+  run_code:
+    runs-on: ubuntu-latest
 
-    steps
-      - name Checkout repository
-        uses actionscheckout@v2
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - name Set up Python
-        uses actionssetup-python@v2
-        with
-          python-version '3.x'
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
 
-      - name Install dependencies
-        run 
+      - name: Install dependencies
+        run: |
           pip install -r requirements.txt
 
-      - name Run Python script
-        run 
+      - name: Run Python script
+        run: |
           python main.py
