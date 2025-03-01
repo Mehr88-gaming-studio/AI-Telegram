@@ -1,8 +1,8 @@
 from groq import Groq
 import requests
+import time
 
 api_token = "7650006636:AAFFgk-DEGYQgsDjCKq42mdJYMNL9Pv-EKs"
-chat_id = "7817879334"
 send_message_url = f"https://api.telegram.org/bot{api_token}/sendMessage"
 get_updates_url = f"https://api.telegram.org/bot{api_token}/getUpdates"
 
@@ -19,6 +19,7 @@ def send_message(chat_id, text):
         print("Failed to send message.")
         print("Status Code:", response.status_code)
         print("Response:", response.text)
+
 def get_updates(offset=None):
     params = {'timeout': 100, 'offset': offset}
     response = requests.get(get_updates_url, params=params)
@@ -29,7 +30,7 @@ def get_updates(offset=None):
         print("Status Code:", response.status_code)
         print("Response:", response.text)
         return None
-    
+
 update_id = None
 
 def get_message():
@@ -41,20 +42,21 @@ def get_message():
             for update in updates['result']:
                 update_id = update['update_id'] + 1
                 if 'message' in update:
+                    chat_id = update['message']['chat']['id']
                     message_text = update['message'].get('text', '')
                     if message_text:
-                        return message_text
-
+                        return chat_id, message_text
+        else:
+            print("Waiting before retrying...")
+            time.sleep(10)
 
 client = Groq(
     api_key="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",
 )
 
-user_input = ""
-
 while True:
-    user_input = get_message()
-    print(user_input)
+    chat_id, user_input = get_message()
+    print(f"Received message from {chat_id}: {user_input}")
     chat_completion = client.chat.completions.create(
         messages=[
             {
@@ -62,7 +64,7 @@ while True:
                 "content": user_input,
             }
         ],
-        model="llama-3.3-70b-versatile",
+        model="deepseek-r1-distill-llama-70b",
         stream=False,
     )
 
